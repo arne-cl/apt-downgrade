@@ -13,10 +13,17 @@ def user_proceed(prompt, default=True):
             return False
 
 def pick_origin(pkgver):
+    from sys import stderr
     goodors = filter(lambda x: x.archive != "now", pkgver.origins)
-    assert len(goodors) == 1
-    return goodors[0]
-
+    if len(goodors) != 0:
+        if len(goodors) != 1:
+            print >>stderr, "Package %s-%s has multiple archives: " % (
+                    pkgver.package.name, pkgver.version) + ", ".join(
+                    map(lambda x: x.archive, goodors))
+        return goodors[0]
+    else:
+        assert len(pkgver.origins) == 1, pkgver.origins
+        return pkgver.origins[0]
 from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-u", "--update", action="store_true", default=False,
@@ -52,6 +59,13 @@ for pkg in cache:
             if ver.downloadable and ver > cand:
                 cand = ver
         #print pkg.installed, "->", cand
+        if cand is None:
+            if user_proceed(
+                    "Remove '%s' version %s [y]?" % (
+                    pkg.name, pkg.installed.version)):
+                #pkg.candidate = None
+                pkg.mark_delete(autoFix=False, purge=False)
+                assert pkg.marked_delete
         if cand != None:
             if user_proceed(
                     "Force '%s' version\n  from %s\n  to   %s (%s) [y]? "
@@ -72,7 +86,7 @@ if cache.get_changes():
         print "  %s %s => %s (%s)" % (
                 pkg.name,
                 pkg.installed and pkg.installed.version,
-                pkg.candidate.version,
+                None if pkg.marked_delete else pkg.candidate.version,
                 pick_origin(pkg.candidate).archive)
     print "%.1f MB will be downloaded" % (cache.required_download / 1e6)
     if user_proceed("Do you wish to make the changes above? [n]? ", default=False):
