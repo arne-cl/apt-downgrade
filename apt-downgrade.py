@@ -64,7 +64,7 @@ for pkg in cache:
                     "Remove '%s' version %s [y]?" % (
                     pkg.name, pkg.installed.version)):
                 #pkg.candidate = None
-                pkg.mark_delete(autoFix=False, purge=False)
+                pkg.mark_delete(auto_fix=False, purge=False)
                 assert pkg.marked_delete
         if cand != None:
             if user_proceed(
@@ -74,7 +74,7 @@ for pkg in cache:
                         cand.version,
                         pick_origin(cand).archive)):
                 pkg.candidate = cand
-                pkg.mark_install(autoFix=False, fromUser=False)
+                pkg.mark_install(auto_fix=False, from_user=False)
             #pkg.mark_upgrade()
 
 print "Resolving package problems (pass -f to disable this step)..."
@@ -92,9 +92,7 @@ if cache.get_changes():
     if user_proceed("Do you wish to make the changes above? [n]? ", default=False):
         while True:
             try:
-                cache.commit(
-                        apt.progress.TextFetchProgress(),
-                        apt.progress.InstallProgress())
+                cache.commit()
             except SystemError as exc:
                 print exc
                 if not user_proceed("An error occurred, try again? [y]? "):
