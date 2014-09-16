@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+from sys import stderr
+from optparse import OptionParser
+import apt
+import apt.progress
+import apt_pkg
+
+
 def user_proceed(prompt, default=True):
     if default == True and opts.yes:
         return True
@@ -14,7 +21,6 @@ def user_proceed(prompt, default=True):
 
 
 def pick_origin(pkgver):
-    from sys import stderr
     goodors = filter(lambda x: x.archive != "now", pkgver.origins)
     if len(goodors) != 0:
         if len(goodors) != 1:
@@ -28,7 +34,6 @@ def pick_origin(pkgver):
 
 
 if __name__ == '__main__':
-    from optparse import OptionParser
     parser = OptionParser()
     parser.add_option("-u", "--update", action="store_true", default=False,
             help="update the package cache first")
@@ -38,7 +43,7 @@ if __name__ == '__main__':
             help="force the requested changes, don't resolve problems")
     opts, args = parser.parse_args()
 
-    import apt, apt.progress, apt_pkg
+
 
     # try to grab the system lock briefly, so we're not caught without it later
     try:
